@@ -15,6 +15,7 @@ class Crucible.TestExecutor
     collapseAllButton: '<i class="fa fa-expand"></i>&nbsp;Collapse All Test Suites'
     expandAllButton: '<i class="fa fa-expand"></i>&nbsp;Expand All Test Suites'
     spinner: '<span class="fa fa-lg fa-fw fa-spinner fa-pulse tests"></span>'
+  statusWeights: {'pass': 1, 'skip': 2, 'fail': 3, 'error': 4}
 
   constructor: ->
     @element = $('.test-executor')
@@ -96,6 +97,11 @@ class Crucible.TestExecutor
     @element.find('.test-run-result.executed').show()
     
   handleSuiteResult: (suite, result, suiteElement) =>
+    suiteStatus = 'pass'
+    $(result.tests).each (i, test) =>
+      suiteStatus = test.status if @statusWeights[suiteStatus] < @statusWeights[test.status]
+    result.suiteStatus = suiteStatus
+
     suiteElement.replaceWith(HandlebarsTemplates[@templates.suiteResult]({suite: suite, result: result}))
     suiteElement = @element.find("#test-"+suite.id)
     $(result.tests).each (i, test) =>
